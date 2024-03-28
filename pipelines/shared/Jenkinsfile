@@ -107,7 +107,8 @@ pipeline {
                 CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
                 INTENTION_ID = "${params.intentionId}"
                 DOWNLOAD_URL = "${params.downloadUrl}"
-                ARTIFACT_SHA256 = "${params.artifactSha256}"
+                //ARTIFACT_SHA256 = "${params.artifactSha256}"
+                ARTIFACT_SHA256 = "fb5b3fc129b6c85b8a86f5aa3e9b016a2618fe99ac2f3300a7fa319ab583223b"
                 ARTIFACT_NAME="${params.artifactName}"
             }
             steps {

@@ -38,7 +38,7 @@ pipeline {
                         if (DOWNLOAD_URL.contains('github')) {
                             sh 'cd downloads ; curl -LO ${DOWNLOAD_URL}'
                         }
-                    }
+                    }                    
                     if (DOWNLOAD_URL.contains('github')) {
                         def artifact_download_sha256 = sh(
                             returnStdout: true,
@@ -107,6 +107,8 @@ pipeline {
                 CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
                 INTENTION_ID = "${params.intentionId}"
                 DOWNLOAD_URL = "${params.downloadUrl}"
+                ARTIFACT_SHA256 = "${params.artifactSha256}"
+                ARTIFACT_NAME="${params.artifactName}"
             }
             steps {
                 script {
@@ -157,7 +159,7 @@ pipeline {
                                 -v \$(pwd)/downloads:/ansible/downloads \
                                 -e PODMAN_*",
                             command: 'ansible-playbook -i inventory/${PODMAN_ANSIBLE_INVENTORY_PATH} \
-                                app/playbooks/playbook.yaml --extra-vars "env_vars=dev"')
+                                app/playbooks/playbook.yaml --extra-vars "env_vars=dev artifact_name=${ARTIFACT_NAME} artifact_sha256=${ARTIFACT_SHA256}"')
                         podman.logout(authfile: "${env.AUTHFILE}")
                         intention.endAction("install")
                         vault.revokeToken()

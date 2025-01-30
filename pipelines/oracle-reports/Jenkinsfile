@@ -41,14 +41,12 @@ pipeline {
                 COMPONENT = "${params.component}"
                 GIT_REPO = "${params.gitRepo}"
                 GIT_BRANCH = "${params.gitBranch}"
-                APP_ROLE_ID = credentials("knox-${params.project}-${params.component}-dev-role-id")
                 EVENT_PROVIDER = "${params.eventProvider}"
                 VAULT_ADDR = "https://knox.io.nrs.gov.bc.ca"
                 BROKER_URL = "https://broker.io.nrs.gov.bc.ca"
                 HTTP_PROXY = "http://test-forwardproxy.nrs.bcgov:23128"
                 AUTHFILE = "auth.json"
                 CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
-                INTENTION_ID = "${params.intentionId}"
             }
             steps {
                 script {
@@ -61,13 +59,12 @@ pipeline {
                             provider: env.EVENT_PROVIDER,
                             environment: 'development'
                         )
-                        intention.open(NR_BROKER_JWT)
+                        BROKER_JWT = "${params.brokerJwt}"
+                        intention.open(BROKER_JWT)
                         intention.startAction("login")
-                        def vaultToken = intention.provisionToken("login", CONFIG_ROLE_ID)
+                        def vaultToken = intention.provisionToken("login")
                         def vault = new Vault(vaultToken)
-                        vault.readToObject("apps/data/prod/jenkins/jenkins-apps/jdk_cacerts_pass", env)
-                        vault.readToObject("apps/data/prod/jenkins/jenkins-apps/artifactory", env)
-                        vault.readToObject("apps/data/prod/jenkins/jenkins-apps/cdua", env)
+                        vault.readToObject("apps/data/dev/nr-oracle-reports/oracle-reports-build/ssh", env)
                     } catch (IllegalStateException ex) {
                         echo "IllegalStateException occurred: $ex"
                         currentBuild.result = 'ABORTED'
@@ -106,11 +103,30 @@ pipeline {
                 COMPONENT = "${params.component}"
                 GIT_REPO = "${params.gitRepo}"
                 GIT_BRANCH = "${params.gitBranch}"
+                EVENT_PROVIDER = "${params.eventProvider}"
+                VAULT_ADDR = "https://knox.io.nrs.gov.bc.ca"
+                BROKER_URL = "https://broker.io.nrs.gov.bc.ca"
+                HTTP_PROXY = "http://test-forwardproxy.nrs.bcgov:23128"
+                AUTHFILE = "auth.json"
+                CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
             }
             steps {
                 script {
                     try {
                         echo 'Do test deployment'
+                        intention = new BrokerIntention(readJSON(file: "app/.jenkins/oracle-reports-intention.json"))
+                        intention.setEventDetails(
+                            userName: env.CAUSE_USER_ID,
+                            url: env.BUILD_URL,
+                            provider: env.EVENT_PROVIDER,
+                            environment: 'test'
+                        )
+                        BROKER_JWT = "${params.brokerJwt}"
+                        intention.open(BROKER_JWT)
+                        intention.startAction("login")
+                        def vaultToken = intention.provisionToken("login")
+                        def vault = new Vault(vaultToken)
+                        vault.readToObject("apps/data/test/nr-oracle-reports/oracle-reports-build/ssh", env)
                     } catch (IllegalStateException ex) {
                         echo "IllegalStateException occurred: $ex"
                         currentBuild.result = 'ABORTED'
@@ -160,12 +176,30 @@ pipeline {
                 COMPONENT = "${params.component}"
                 GIT_REPO = "${params.gitRepo}"
                 GIT_BRANCH = "${params.gitBranch}"
-                APP_ROLE_ID = credentials("knox-${params.project}-${params.component}-prod-role-id")
+                EVENT_PROVIDER = "${params.eventProvider}"
+                VAULT_ADDR = "https://knox.io.nrs.gov.bc.ca"
+                BROKER_URL = "https://broker.io.nrs.gov.bc.ca"
+                HTTP_PROXY = "http://test-forwardproxy.nrs.bcgov:23128"
+                AUTHFILE = "auth.json"
+                CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
             }
             steps {
                 script {
                     try {
                         echo 'Do production deployment'
+                        intention = new BrokerIntention(readJSON(file: "app/.jenkins/oracle-reports-intention.json"))
+                        intention.setEventDetails(
+                            userName: env.CAUSE_USER_ID,
+                            url: env.BUILD_URL,
+                            provider: env.EVENT_PROVIDER,
+                            environment: 'production'
+                        )
+                        BROKER_JWT = "${params.brokerJwt}"
+                        intention.open(BROKER_JWT)
+                        intention.startAction("login")
+                        def vaultToken = intention.provisionToken("login")
+                        def vault = new Vault(vaultToken)
+                        vault.readToObject("apps/data/prod/nr-oracle-reports/oracle-reports-build/ssh", env)
                     } catch (IllegalStateException ex) {
                         echo "IllegalStateException occurred: $ex"
                         currentBuild.result = 'ABORTED'

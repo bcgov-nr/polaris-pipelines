@@ -64,7 +64,7 @@ pipeline {
                         intention.startAction("login")
                         def vaultToken = intention.provisionToken("login")
                         def vault = new Vault(vaultToken)
-                        vault.readToObject("apps/data/dev/nr-oracle-reports/oracle-reports-build/ssh", env)
+                        vault.readToObject("apps/data/prod/nr-oracle-reports/oracle-reports-build/ssh", env)
                     } catch (IllegalStateException ex) {
                         echo "IllegalStateException occurred: $ex"
                         currentBuild.result = 'ABORTED'
@@ -126,7 +126,7 @@ pipeline {
                         intention.startAction("login")
                         def vaultToken = intention.provisionToken("login")
                         def vault = new Vault(vaultToken)
-                        vault.readToObject("apps/data/test/nr-oracle-reports/oracle-reports-build/ssh", env)
+                        vault.readToObject("apps/data/prod/nr-oracle-reports/oracle-reports-build/ssh", env)
                     } catch (IllegalStateException ex) {
                         echo "IllegalStateException occurred: $ex"
                         currentBuild.result = 'ABORTED'

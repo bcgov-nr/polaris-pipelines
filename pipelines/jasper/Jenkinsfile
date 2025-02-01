@@ -73,8 +73,7 @@ pipeline {
                         def vaultAppToken = intention.provisionToken("configure")
                         def vaultApp = new Vault(vaultAppToken)
                         vaultApp.readToObject("apps/data/dev/${env.PROJECT}/${env.COMPONENT}/development", env, keyTransform: { key -> 'PODMAN_' + key })
-                        vaultApp.revokeToken()
-                        intention.startAction("install")
+                        // intention.startAction("install")
                         // intention.openResponse.actions.each { key, value ->
                         //     env."ACTION_TOKEN_${key.toUpperCase()}" = "${value.token}"
                         // }
@@ -87,9 +86,10 @@ pipeline {
                                 -e PODMAN_*",
                             command: 'ansible-playbook -i localhost app/playbooks/jasper.yaml --extra-vars "env_vars=dev"')
                         podman.logout(authfile: "${env.AUTHFILE}")
-                        intention.endAction("configure")
-                        intention.endAction("install")
+                        // intention.endAction("install")
+                        vaultApp.revokeToken()
                         vault.revokeToken()
+                        intention.endAction("configure")
                         intention.endAction("login")
                         println intention.close(true)
                         intention = null

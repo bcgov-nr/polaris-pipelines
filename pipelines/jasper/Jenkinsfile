@@ -82,7 +82,7 @@ pipeline {
                         podman.login(authfile: "${env.AUTHFILE}", options: "-u ${env.sa_username} -p ${env.sa_password}")
                         podman.run("willhallonline/ansible:2.12-alpine-3.16",
                             authfile: "${env.AUTHFILE}",
-                            options: "-v \$(pwd)/app:/ansible/app \
+                            options: "-w /ansible -v \$(pwd)/app:/ansible/app \
                                 -v \$(pwd)/files/ansible/ansible.cfg:/etc/ansible/ansible.cfg \
                                 -e PODMAN_*",
                             command: 'ansible-playbook app/playbooks/jasper.yaml --extra-vars "env_vars=dev"')

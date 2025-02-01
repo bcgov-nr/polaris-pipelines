@@ -48,6 +48,7 @@ pipeline {
                 AUTHFILE = "auth.json"
                 CAUSE_USER_ID = "${params.userId != null && params.userId != "" ? params.userId : "github@internal"}"
                 CONFIG_ROLE_ID = credentials('knox-jasper-jasper-reports-prod-role-id')
+                APP_ROLE_ID = credentials('knox-fnirs-fnirs-jasper-reports-dev-role-id')
                 JASPER_REPORTS_INSTANCE = "${params.jasperReportsInstance}"
             }
             steps {
@@ -70,7 +71,7 @@ pipeline {
                         vault.readToObject("apps/data/prod/jasper/jasper-reports/${params.jasperReportsInstance}-dev", env)
                         intention.startAction("configure")
                         // do we still need APP_ROLE_ID?
-                        def vaultAppToken = intention.provisionToken("configure")
+                        def vaultAppToken = intention.provisionToken("configure", APP_ROLE_ID)
                         def vaultApp = new Vault(vaultAppToken)
                         vaultApp.readToObject("apps/data/dev/${env.PROJECT}/${env.COMPONENT}/development", env, keyTransform: { key -> 'PODMAN_' + key })
                         // intention.startAction("install")

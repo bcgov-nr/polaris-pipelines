@@ -101,13 +101,14 @@ pipeline {
                         vault.readToObject("apps/data/prod/jasper/jasper-reports-${params.jasperServerInstance}/artifactory", env)
                         vault.readToObject("apps/data/prod/jasper/jasper-reports-${params.jasperServerInstance}/${env.ENV_SHORT}", env, keyTransform: { key -> 'PODMAN_' + key })
                         intention.startAction("configure")
-                        def appRoleId = ""
+                        def appRoleId = null
                         try {
                             withCredentials([string(credentialsId: "knox-${params.project}-${params.component}-${env.ENV_SHORT}-role-id", variable: 'APP_ROLE_ID')]) {
                                 appRoleId = env.APP_ROLE_ID
                             }
                         } catch (Exception e) {
-                            echo "ROLE ID not found - continue without it"
+                            echo "Provisioning without AppRole RoleID (Jenkins credential: knox-${params.project}-${params.component}-${env.ENV_SHORT}-role-id)"
+                            echo "Broker Account must be configured with 'Require RoleId: No'"
                         }
                         def vaultAppToken = intention.provisionToken("configure", appRoleId)
                         def vaultApp = new Vault(vaultAppToken)
